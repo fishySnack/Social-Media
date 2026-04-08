@@ -3,11 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Social Media App</title>
+    <title>Profile Page</title>
     <link rel="stylesheet" href="/profile.css">
 </head>
 <body>
-    <h1>Welcome!</h1>
-    <p>This is your profile page.</p>
+
+<div class="profile-container">
+    <h1>My Profile</h1>
+
+    <form id="profileForm" action="/saveProfile" method="POST" enctype="multipart/form-data">
+        <div class="profile-card">
+            <div class="profile-picture">
+                <img id="profilePreview" src="https://via.placeholder.com/150" alt="Profile Picture">
+                <input type="file" name="image" accept="image/*" id="imageInput">
+            </div>
+
+            <div class="profile-info">
+                <label>Name:</label>
+                <input type="text" name="name" placeholder="Your name">
+
+                <label>Username:</label>
+                <input type="text" name="username" placeholder="Username">
+
+                <label>Bio:</label>
+                <textarea name="bio" placeholder="Write a short bio..."></textarea>
+
+                <button type="submit">Save Profile</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    const imageInput = document.getElementById('imageInput');
+    const profilePreview = document.getElementById('profilePreview');
+
+    imageInput.addEventListener('change', function() {
+        const file = this.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                profilePreview.src = e.target.result;
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+</script>
+
 </body>
 </html>
