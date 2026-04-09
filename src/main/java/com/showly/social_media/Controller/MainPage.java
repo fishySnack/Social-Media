@@ -33,10 +33,18 @@ public class MainPage {
         String base64 = Base64.getEncoder().encodeToString(image.getBytes());
         String dataUrl = "data:" + image.getContentType() + ";base64," + base64;
         //model.addAttribute("imageData", dataUrl);
-        
+
         //I will need to store these data in the database later on
         session.setAttribute("imageData", dataUrl);
-        
+
+        if( name.isBlank() || username.isBlank()){
+            System.out.println("Username or name cannot be blank");
+            return "profile";
+        }
+        //go to database and check if username and name already exist
+
+
+
         model.addAttribute("name", name);
         model.addAttribute("username", username);
         model.addAttribute("bio", bio);
