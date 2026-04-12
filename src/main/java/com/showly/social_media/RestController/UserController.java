@@ -14,7 +14,11 @@ import com.showly.social_media.Service.UserService;
 @RequestMapping("/homepage")
 public class UserController {
 
-    private final UserService userService = new UserService();
+    private final UserService userService;
+
+    public UserController(UserService userService){
+        this.userService = userService;
+    }
 
     /**for friends
     my idea: if the user isnt searching up anything then, it finds 10 random people from database
