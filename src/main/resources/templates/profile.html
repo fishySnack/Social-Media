@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,25 +11,36 @@
 <div class="profile-container">
     <h1>My Profile</h1>
 
+    <p th:if="${error}" th:text="${error}" style="color:red;"></p>
+
     <form id="profileForm" action="/saveProfile" method="POST" enctype="multipart/form-data">
         <div class="profile-card">
+
             <div class="profile-picture">
-                <img id="profilePreview" src="https://via.placeholder.com/150" alt="Profile Picture">
+                <img id="profilePreview"
+                     th:src="${imageData != null} ? ${imageData} : @{/images/defaultProfile.png}"
+                     src="/images/defaultProfile.png"
+                     alt="Profile Picture">
+
                 <input type="file" name="image" accept="image/*" id="imageInput">
             </div>
 
             <div class="profile-info">
                 <label>Name:</label>
-                <input type="text" name="name" placeholder="Your name">
+                <input type="text" name="name" placeholder="Your name"
+                       th:value="${name}" required>
 
                 <label>Username:</label>
-                <input type="text" name="username" placeholder="Username">
+                <input type="text" name="username" placeholder="Username"
+                       th:value="${username}" required>
 
                 <label>Bio:</label>
-                <textarea name="bio" placeholder="Write a short bio..."></textarea>
+                <textarea name="bio" placeholder="Write a short bio..."
+                          th:text="${bio}"></textarea>
 
                 <button type="submit">Save Profile</button>
             </div>
+
         </div>
     </form>
 </div>

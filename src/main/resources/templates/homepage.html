@@ -12,27 +12,31 @@
     <h1>Welcome to Your Homepage</h1>
 
     <div class="profile-card">
+
         <div class="profile-picture">
-            <img th:src="${session.imageData != null} ? ${session.imageData} : 'https://via.placeholder.com/150'" alt="Profile Picture">
+            <img th:src="${user.imageData != null} ? ${user.imageData} : '/images/defaultProfile.png'"
+                 alt="Profile Picture">
         </div>
 
         <div class="profile-info">
-            <p><strong>Name:</strong> <span th:text="${name != null} ? ${name} : 'N/A'"></span></p>
-            <p><strong>Username:</strong> <span th:text="${username != null} ? ${username} : 'N/A'"></span></p>
-            <p><strong>Bio:</strong> <span th:text="${bio != null} ? ${bio} : 'No bio yet.'"></span></p>
+            <p>
+                <strong>Name:</strong>
+                <span th:text="${user.name != null} ? ${user.name} : 'N/A'"></span>
+            </p>
+
+            <p>
+                <strong>Username:</strong>
+                <span th:text="${user.username != null} ? ${user.username} : 'N/A'"></span>
+            </p>
+
+            <p>
+                <strong>Bio:</strong>
+                <span th:text="${user.bio != null} ? ${user.bio} : 'No bio yet.'"></span>
+            </p>
         </div>
+
     </div>
 
-    <div class="uploads-section">
-        <h2>Uploaded Files</h2>
-        <div class="uploaded-files">
-            <div class="file-card" th:each="file : ${files}">
-                <img th:src="@{${file.path}}" alt="Uploaded File">
-                <p th:text="${file.name}"></p>
-            </div>
-            <p th:if="${#lists.isEmpty(files)}" style="text-align:center; color:#888;">No files uploaded yet.</p>
-        </div>
-    </div>
 </div>
 
 </body>

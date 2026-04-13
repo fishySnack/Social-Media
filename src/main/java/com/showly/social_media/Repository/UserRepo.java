@@ -8,5 +8,6 @@ import com.showly.social_media.Data.User;
 
 @Repository
 public interface UserRepo extends JpaRepository<User, Long> {
+    User findByUsername(String username);
     
 }
