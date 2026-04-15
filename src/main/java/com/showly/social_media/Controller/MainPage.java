@@ -2,6 +2,7 @@ package com.showly.social_media.Controller;
 
 import java.io.IOException;
 import java.util.Base64;
+import java.util.List;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -9,7 +10,10 @@ import org.springframework.web.bind.annotation.*;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import com.showly.social_media.Data.Post;
 import com.showly.social_media.Data.User;
+import com.showly.social_media.Enum.MediaType;
+import com.showly.social_media.Repository.PostRepo;
 import com.showly.social_media.Repository.UserRepo;
 
 import lombok.RequiredArgsConstructor;
@@ -18,12 +22,13 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class MainPage {
 
-    private final UserRepo repo;
+    private final UserRepo userRepo;
+    private final PostRepo postRepo;
 
     @GetMapping("/")
     public String startPage(Model model) {
 
-        User user = repo.findAll()
+        User user = userRepo.findAll()
                 .stream()
                 .reduce((first, second) -> second)
                 .orElse(new User());
@@ -32,6 +37,23 @@ public class MainPage {
 
         return "profile";
     }
+
+    @GetMapping("/homepage")
+    public String homepage(Model model) {
+
+        User user = userRepo.findAll()
+                .stream()
+                .reduce((first, second) -> second)
+                .orElse(new User());
+
+        List<Post> posts = postRepo.findAll();
+
+        model.addAttribute("user", user);
+        model.addAttribute("posts", posts);
+
+        return "homepage";
+    }
+
     @PostMapping("/saveProfile")
     public String saveProfile(
             @ModelAttribute User user,
@@ -50,7 +72,7 @@ public class MainPage {
             return "profile";
         }
 
-        User existing = repo.findByUsername(user.getUsername());
+        User existing = userRepo.findByUsername(user.getUsername());
 
         if (existing != null) {
             user.setId(existing.getId());
@@ -63,9 +85,34 @@ public class MainPage {
             user.setImageData(dataUrl);
         }
 
-        repo.save(user);
+        userRepo.save(user);
 
-        return "homepage";
+        return "redirect:/homepage";
     }
-    
+
+    @PostMapping("/addPost")
+    public String addPost(
+            @RequestParam("image") MultipartFile image) throws IOException {
+
+        User user = userRepo.findAll()
+                .stream()
+                .reduce((first, second) -> second)
+                .orElse(null);
+
+        if (user == null || image.isEmpty()) {
+            return "redirect:/homepage";
+        }
+
+        String base64 = Base64.getEncoder().encodeToString(image.getBytes());
+        String dataUrl = "data:" + image.getContentType() + ";base64," + base64;
+
+        Post post = new Post();
+        post.setMediaUrl(dataUrl);
+        post.setType(MediaType.IMAGE);
+        post.setUser(user);
+
+        postRepo.save(post);
+
+        return "redirect:/homepage";
+    }
 }

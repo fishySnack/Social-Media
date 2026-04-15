@@ -8,57 +8,55 @@
 </head>
 <body>
 
-<div class="profile-container">
+<div class="profile-container single-col">
+
     <h1>My Profile</h1>
 
-    <p th:if="${error}" th:text="${error}" style="color:red;"></p>
+    <p th:if="${error}" th:text="${error}" class="error-msg"></p>
 
     <form id="profileForm" action="/saveProfile" method="POST" enctype="multipart/form-data">
-        <div class="profile-card">
+        <div class="profile-card edit-card">
 
             <div class="profile-picture">
                 <img id="profilePreview"
                      th:src="${imageData != null} ? ${imageData} : @{/images/defaultProfile.png}"
                      src="/images/defaultProfile.png"
                      alt="Profile Picture">
-
                 <input type="file" name="image" accept="image/*" id="imageInput">
             </div>
 
             <div class="profile-info">
-                <label>Name:</label>
-                <input type="text" name="name" placeholder="Your name"
-                       th:value="${name}" required>
+                <label>Name</label>
+                <input type="text" name="name" placeholder="Your name" th:value="${name}" required>
 
-                <label>Username:</label>
-                <input type="text" name="username" placeholder="Username"
-                       th:value="${username}" required>
+                <label>Username</label>
+                <input type="text" name="username" placeholder="Username" th:value="${username}" required>
 
-                <label>Bio:</label>
-                <textarea name="bio" placeholder="Write a short bio..."
-                          th:text="${bio}"></textarea>
+                <label>Bio</label>
+                <textarea name="bio" placeholder="Write a short bio..." th:text="${bio}"></textarea>
 
                 <button type="submit">Save Profile</button>
             </div>
 
         </div>
     </form>
+
 </div>
 
 <script>
-    const imageInput = document.getElementById('imageInput');
-    const profilePreview = document.getElementById('profilePreview');
+const imageInput = document.getElementById('imageInput');
+const profilePreview = document.getElementById('profilePreview');
 
-    imageInput.addEventListener('change', function() {
-        const file = this.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                profilePreview.src = e.target.result;
-            }
-            reader.readAsDataURL(file);
+imageInput.addEventListener('change', function() {
+    const file = this.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            profilePreview.src = e.target.result;
         }
-    });
+        reader.readAsDataURL(file);
+    }
+});
 </script>
 
 </body>

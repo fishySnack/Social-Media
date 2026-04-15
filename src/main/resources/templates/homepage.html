@@ -9,35 +9,79 @@
 <body>
 
 <div class="profile-container">
-    <h1>Welcome to Your Homepage</h1>
 
-    <div class="profile-card">
+    <div class="main-content">
 
-        <div class="profile-picture">
-            <img th:src="${user.imageData != null} ? ${user.imageData} : '/images/defaultProfile.png'"
-                 alt="Profile Picture">
-        </div>
-
-        <div class="profile-info">
-            <p>
-                <strong>Name:</strong>
-                <span th:text="${user.name != null} ? ${user.name} : 'N/A'"></span>
-            </p>
-
-            <p>
-                <strong>Username:</strong>
-                <span th:text="${user.username != null} ? ${user.username} : 'N/A'"></span>
-            </p>
-
-            <p>
-                <strong>Bio:</strong>
-                <span th:text="${user.bio != null} ? ${user.bio} : 'No bio yet.'"></span>
-            </p>
+        <div class="profile-card">
+            <div class="profile-row">
+                <div class="profile-picture">
+                    <img th:src="${user.imageData != null} ? ${user.imageData + '?t=' + T(java.lang.System).currentTimeMillis()} : '/images/defaultProfile.png'">
+                </div>
+                <div class="profile-info">
+                    <p><strong>Name:</strong> <span th:text="${user.name}"></span></p>
+                    <p><strong>Username:</strong> <span th:text="${user.username}"></span></p>
+                    <p><strong>Bio:</strong> <span th:text="${user.bio}"></span></p>
+                </div>
+            </div>
+            <div class="post-form">
+                <form action="/addPost" method="POST" enctype="multipart/form-data">
+                    <input type="file" name="image" required>
+                    <button type="submit">Post</button>
+                </form>
+            </div>
+            <div class="posts-grid">
+                <img th:each="post : ${posts}" th:src="${post.mediaUrl}">
+            </div>
         </div>
 
     </div>
 
+    <div class="sidebar">
+        <div class="sidebar-card">
+            <h2>Find Friends</h2>
+            <input type="text" id="search" class="search-input" placeholder="Search users...">
+            <div id="friendsList"></div>
+        </div>
+    </div>
+
 </div>
+
+<script>
+let timeout = null;
+const input = document.getElementById("search");
+const list = document.getElementById("friendsList");
+
+function loadUsers(query="") {
+    fetch("/homepage/f" + (query ? "?query=" + query : ""))
+        .then(res => res.json())
+        .then(data => {
+            list.innerHTML = "";
+            data.forEach(user => {
+                const div = document.createElement("div");
+                div.className = "friend";
+
+                const img = document.createElement("img");
+                img.src = user.imageData ? user.imageData : "/images/defaultProfile.png";
+
+                const span = document.createElement("span");
+                span.innerText = user.username;
+
+                div.appendChild(img);
+                div.appendChild(span);
+                list.appendChild(div);
+            });
+        });
+}
+
+input.addEventListener("input", () => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => {
+        loadUsers(input.value);
+    }, 300);
+});
+
+loadUsers();
+</script>
 
 </body>
 </html>

@@ -14,7 +14,7 @@ import com.showly.social_media.Repository.UserRepo;
 public class UserService {
 
     private final UserRepo repo;
-    private int startingSearch = 10;
+    private int searchAmount = 10;
 
     public UserService(UserRepo repo){
         this.repo = repo;
@@ -25,12 +25,14 @@ public class UserService {
         return repo.save(user);
     }
     
-    public List<User> searchLimited(){
-        return null;
+    public List<User> searchLimited() {
+        return repo.findRandomUsers(searchAmount);
     }
 
     public List<User> searchByString(String searchBy){
-        return null;
+        //if (searchBy == null || searchBy.isBlank()) return searchLimited();
+
+        return repo.findByUsernameContainingIgnoreCase(searchBy);
     }
 
     public boolean deleteUser(Long id){
@@ -55,7 +57,7 @@ public class UserService {
 
         if(isFound.isEmpty()) {
             log.error("update user not found");
-            return false;// should throw an error, will add later
+            return false;
         }
 
         User target = isFound.get();
