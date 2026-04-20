@@ -15,7 +15,8 @@
         <div class="profile-card">
             <div class="profile-row">
                 <div class="profile-picture">
-                    <img th:src="${user.imageData != null} ? ${user.imageData + '?t=' + T(java.lang.System).currentTimeMillis()} : '/images/defaultProfile.png'">
+                    <img th:src="${user.imageData != null} ? ${user.imageData} : @{/images/defaultProfile.png}"
+                         alt="Profile Picture">
                 </div>
                 <div class="profile-info">
                     <p><strong>Name:</strong> <span th:text="${user.name}"></span></p>
@@ -23,14 +24,19 @@
                     <p><strong>Bio:</strong> <span th:text="${user.bio}"></span></p>
                 </div>
             </div>
+
             <div class="post-form">
                 <form action="/addPost" method="POST" enctype="multipart/form-data">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                     <input type="file" name="image" required>
                     <button type="submit">Post</button>
                 </form>
             </div>
-            <div class="posts-grid">
-                <img th:each="post : ${posts}" th:src="${post.mediaUrl}">
+
+            <div class="posts-grid" id="postsGrid">
+                <img th:each="post : ${posts}"
+                     th:src="${post.mediaUrl}"
+                     alt="Post">
             </div>
         </div>
 
@@ -51,8 +57,8 @@ let timeout = null;
 const input = document.getElementById("search");
 const list = document.getElementById("friendsList");
 
-function loadUsers(query="") {
-    fetch("/homepage/f" + (query ? "?query=" + query : ""))
+function loadUsers(query = "") {
+    fetch("/homepage/f" + (query ? "?query=" + encodeURIComponent(query) : ""))
         .then(res => res.json())
         .then(data => {
             list.innerHTML = "";
@@ -62,6 +68,7 @@ function loadUsers(query="") {
 
                 const img = document.createElement("img");
                 img.src = user.imageData ? user.imageData : "/images/defaultProfile.png";
+                img.alt = user.username;
 
                 const span = document.createElement("span");
                 span.innerText = user.username;

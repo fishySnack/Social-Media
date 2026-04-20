@@ -22,7 +22,8 @@
                      th:src="${imageData != null} ? ${imageData} : @{/images/defaultProfile.png}"
                      src="/images/defaultProfile.png"
                      alt="Profile Picture">
-                <input type="file" name="image" accept="image/*" id="imageInput">
+                <button type="button" onclick="document.getElementById('imageInput').click()">Change Photo</button>
+                <input type="file" name="image" accept="image/*" id="imageInput" style="display:none">
             </div>
 
             <div class="profile-info">
