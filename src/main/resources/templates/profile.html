@@ -14,7 +14,8 @@
 
     <p th:if="${error}" th:text="${error}" class="error-msg"></p>
 
-    <form id="profileForm" action="/saveProfile" method="POST" enctype="multipart/form-data">
+    <form id="profileForm" action="/profile" method="POST" enctype="multipart/form-data">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
         <div class="profile-card edit-card">
 
             <div class="profile-picture">

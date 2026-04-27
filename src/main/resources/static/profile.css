@@ -263,6 +263,25 @@ h1 {
     margin-bottom: 14px;
 }
 
+.logout-btn {
+    padding: 8px 16px;
+    border-radius: 9px;
+    border: 1px solid #3a3a3a;
+    background: #252525;
+    color: #e8e8e8;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: system-ui, sans-serif;
+    white-space: nowrap;
+}
+
+.logout-btn:hover {
+    background: #3a1a1a;
+    border-color: #5a2a2a;
+    color: #e55;
+}
+
 @media (max-width: 680px) {
     .profile-container {
         grid-template-columns: 1fr;

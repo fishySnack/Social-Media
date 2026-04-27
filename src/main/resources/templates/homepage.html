@@ -23,8 +23,12 @@
                     <p><strong>Username:</strong> <span th:text="${user.username}"></span></p>
                     <p><strong>Bio:</strong> <span th:text="${user.bio}"></span></p>
                 </div>
+                <form action="/logout" method="post" style="margin-left:auto">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                    <button type="submit" class="logout-btn">Logout</button>
+                </form>
             </div>
-
+            
             <div class="post-form">
                 <form action="/addPost" method="POST" enctype="multipart/form-data">
                     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">

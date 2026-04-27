@@ -65,7 +65,7 @@ public class MainPage {
                 SecurityContextHolder.getContext()
         );
 
-        return "redirect:/homepage";
+        return "redirect:/profile";
     }
 
     @GetMapping("/homepage")
@@ -87,7 +87,7 @@ public class MainPage {
         return "profile";
     }
 
-    @PostMapping("/saveProfile")
+    @PostMapping("/profile")
     public String saveProfile(
             @RequestParam String name,
             @RequestParam String username,

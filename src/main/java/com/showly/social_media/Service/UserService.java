@@ -4,8 +4,6 @@ import java.util.List;
 import java.util.Optional;
 
 import lombok.extern.slf4j.Slf4j;
-
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +16,7 @@ public class UserService {
 
     private final UserRepo repo;
     private final PasswordEncoder passwordEncoder;
-    private int searchAmount = 10;
+    private final int SEARCH_AMOUNT = 10;
 
     public UserService(UserRepo repo, PasswordEncoder passwordEncoder) {
         this.repo = repo;
@@ -54,7 +52,7 @@ public class UserService {
     }
 
     public List<User> searchLimited() {
-        return repo.findRandomUsers(searchAmount);
+        return repo.findRandomUsers(SEARCH_AMOUNT);
     }
 
     public List<User> searchByString(String searchBy) {
