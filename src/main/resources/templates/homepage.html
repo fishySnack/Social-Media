@@ -1,96 +1,285 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home Page</title>
-    <link rel="stylesheet" href="/profile.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Friendly</title>
+
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/homepage.css">
 </head>
+
 <body>
 
-<div class="profile-container">
+<!-- 🔥 THYMELEAF SAFE USER (FIXES UNDEFINED ISSUE) -->
+<script>
+window.CURRENT_USER = {
+  name: "[[${user.name}]]",
+  username: "[[${user.username}]]",
+  bio: "[[${user.bio}]]"
+};
+</script>
 
-    <div class="main-content">
+<div class="layout">
 
-        <div class="profile-card">
-            <div class="profile-row">
-                <div class="profile-picture">
-                    <img th:src="${user.imageData != null} ? ${user.imageData} : @{/images/defaultProfile.png}"
-                         alt="Profile Picture">
-                </div>
-                <div class="profile-info">
-                    <p><strong>Name:</strong> <span th:text="${user.name}"></span></p>
-                    <p><strong>Username:</strong> <span th:text="${user.username}"></span></p>
-                    <p><strong>Bio:</strong> <span th:text="${user.bio}"></span></p>
-                </div>
-                <form action="/logout" method="post" style="margin-left:auto">
-                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                    <button type="submit" class="logout-btn">Logout</button>
-                </form>
-            </div>
-            
-            <div class="post-form">
-                <form action="/addPost" method="POST" enctype="multipart/form-data">
-                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                    <input type="file" name="image" required>
-                    <button type="submit">Post</button>
-                </form>
-            </div>
+  <!-- LEFT PANEL -->
+  <div class="panel">
 
-            <div class="posts-grid" id="postsGrid">
-                <img th:each="post : ${posts}"
-                     th:src="${post.mediaUrl}"
-                     alt="Post">
-            </div>
+    <!-- PROFILE -->
+    <div class="card">
+      <div class="section-title">Profile</div>
+
+      <div class="post-header">
+        <div class="post-avatar" id="profileAvatar">U</div>
+        <div class="post-meta">
+          <div class="post-username" id="profileName">Loading...</div>
+          <div class="post-time" id="profileUsername"></div>
         </div>
+      </div>
 
+      <div class="modal-bio" id="profileBio"></div>
+
+      <form action="/logout" method="post" style="margin-top:12px">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+        <button class="btn-ghost" type="submit">Logout</button>
+      </form>
     </div>
 
-    <div class="sidebar">
-        <div class="sidebar-card">
-            <h2>Find Friends</h2>
-            <input type="text" id="search" class="search-input" placeholder="Search users...">
-            <div id="friendsList"></div>
-        </div>
+    <!-- FRIEND REQUESTS -->
+    <div class="card">
+      <div class="section-title">
+        Friend Requests
+        <span class="tag" id="reqBadge">0</span>
+      </div>
+      <div id="requestsList"></div>
     </div>
+
+    <div class="divider"></div>
+
+    <!-- FRIEND SEARCH -->
+    <div class="section-title">Find Friends</div>
+    <input type="text" id="search" class="search-box" placeholder="Search users...">
+    <div id="friendsList"></div>
+
+  </div>
+
+  <!-- FEED -->
+  <div class="feed">
+
+    <div class="compose">
+      <div class="compose-row">
+        <div class="nav-avatar" id="meAvatarSmall">U</div>
+        <textarea class="compose-input" id="postText"
+          placeholder="Share something..."
+          oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+      </div>
+
+      <div class="compose-actions">
+        <button class="btn-ghost">📷 Photo</button>
+        <button class="btn-primary" onclick="createPost()">Post</button>
+      </div>
+    </div>
+
+    <div id="posts"></div>
+  </div>
+
+  <!-- MESSAGES -->
+  <div class="panel">
+    <div class="section-title">Messages</div>
+    <div id="messages"></div>
+  </div>
 
 </div>
 
+<!-- CHAT MODAL -->
+<div class="chat-modal" id="chatModal" onclick="closeChatModal(event)">
+  <div class="chat-window" onclick="event.stopPropagation()">
+
+    <div class="chat-header">
+      <div class="friend-avatar" id="chatAvatar">U</div>
+      <div>
+        <div class="chat-header-name" id="chatName"></div>
+        <div class="chat-header-status">Online</div>
+      </div>
+      <button class="modal-close" onclick="document.getElementById('chatModal').classList.remove('open')">✕</button>
+    </div>
+
+    <div class="chat-messages" id="chatBox"></div>
+
+    <div class="chat-input-row">
+      <input class="chat-input" id="chatInput" placeholder="Message..."
+             onkeydown="if(event.key==='Enter') sendMessage()">
+      <button class="chat-send" onclick="sendMessage()">➤</button>
+    </div>
+
+  </div>
+</div>
+
 <script>
+let currentChatUser = null;
+
+/* ---------------- PROFILE (FIXED) ---------------- */
+function loadMe() {
+  const me = window.CURRENT_USER;
+
+  if (!me) return;
+
+  document.getElementById("profileName").innerText =
+    me.name || me.username || "Unknown";
+
+  document.getElementById("profileUsername").innerText =
+    me.username ? "@" + me.username : "";
+
+  document.getElementById("profileBio").innerText =
+    me.bio || "";
+
+  const initials = getInitials(me.name || me.username);
+  document.getElementById("profileAvatar").innerText = initials;
+  document.getElementById("meAvatarSmall").innerText = initials;
+}
+
+/* ---------------- POSTS ---------------- */
+async function loadPosts() {
+  const res = await fetch("/api/posts");
+  const posts = await res.json();
+
+  document.getElementById("posts").innerHTML = posts.map(p => `
+    <div class="card">
+      <div class="post-header">
+        <div class="post-avatar">${getInitials(p.username)}</div>
+        <div class="post-meta">
+          <div class="post-username">${p.username}</div>
+          <div class="post-time">${p.time || ""}</div>
+        </div>
+      </div>
+      <div class="post-img-placeholder">🖼 ${p.caption || ""}</div>
+    </div>
+  `).join("");
+}
+
+/* ---------------- FRIENDS (YOUR BACKEND) ---------------- */
 let timeout = null;
 const input = document.getElementById("search");
 const list = document.getElementById("friendsList");
 
 function loadUsers(query = "") {
-    fetch("/homepage/f" + (query ? "?query=" + encodeURIComponent(query) : ""))
-        .then(res => res.json())
-        .then(data => {
-            list.innerHTML = "";
-            data.forEach(user => {
-                const div = document.createElement("div");
-                div.className = "friend";
+  fetch("/homepage/f" + (query ? "?query=" + encodeURIComponent(query) : ""))
+    .then(res => res.json())
+    .then(data => {
+      list.innerHTML = "";
 
-                const img = document.createElement("img");
-                img.src = user.imageData ? user.imageData : "/images/defaultProfile.png";
-                img.alt = user.username;
+      data.forEach(user => {
+        const row = document.createElement("div");
+        row.className = "friend-row";
 
-                const span = document.createElement("span");
-                span.innerText = user.username;
+        row.onclick = () => openChat(user.username);
 
-                div.appendChild(img);
-                div.appendChild(span);
-                list.appendChild(div);
-            });
-        });
+        const avatar = document.createElement("div");
+        avatar.className = "friend-avatar";
+        avatar.innerText = getInitials(user.name || user.username);
+
+        const info = document.createElement("div");
+        info.className = "friend-info";
+
+        const name = document.createElement("div");
+        name.className = "friend-name";
+        name.innerText = user.username;
+
+        const sub = document.createElement("div");
+        sub.className = "friend-sub";
+        sub.innerText = user.name || "";
+
+        info.appendChild(name);
+        info.appendChild(sub);
+
+        row.appendChild(avatar);
+        row.appendChild(info);
+
+        list.appendChild(row);
+      });
+    });
 }
 
 input.addEventListener("input", () => {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => {
-        loadUsers(input.value);
-    }, 300);
+  clearTimeout(timeout);
+  timeout = setTimeout(() => loadUsers(input.value), 300);
 });
 
+/* ---------------- MESSAGES ---------------- */
+async function openChat(user) {
+  currentChatUser = user;
+
+  document.getElementById("chatModal").classList.add("open");
+  document.getElementById("chatName").innerText = user;
+  document.getElementById("chatAvatar").innerText = getInitials(user);
+
+  const res = await fetch(`/api/messages/${user}`);
+  const msgs = await res.json();
+
+  const box = document.getElementById("chatBox");
+
+  box.innerHTML = msgs.map(m => `
+    <div class="bubble-row ${m.mine ? 'mine' : ''}">
+      <div class="bubble ${m.mine ? 'mine' : 'theirs'}">${m.text}</div>
+    </div>
+  `).join("");
+
+  box.scrollTop = box.scrollHeight;
+}
+
+/* ---------------- SEND MESSAGE (OPTIMIZED) ---------------- */
+async function sendMessage() {
+  const input = document.getElementById("chatInput");
+  const text = input.value.trim();
+  if (!text || !currentChatUser) return;
+
+  const box = document.getElementById("chatBox");
+
+  // instant UI update
+  box.innerHTML += `
+    <div class="bubble-row mine">
+      <div class="bubble mine">${text}</div>
+    </div>
+  `;
+
+  box.scrollTop = box.scrollHeight;
+  input.value = "";
+
+  await fetch(`/api/messages/${currentChatUser}`, {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ text })
+  });
+}
+
+/* ---------------- POST ---------------- */
+async function createPost() {
+  const text = document.getElementById("postText").value.trim();
+  if (!text) return;
+
+  await fetch("/api/posts", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ caption: text })
+  });
+
+  document.getElementById("postText").value = "";
+  loadPosts();
+}
+
+/* ---------------- HELPERS ---------------- */
+function getInitials(name) {
+  if (!name) return "U";
+  return name
+    .split(/[\s_]+/)
+    .map(w => w[0]?.toUpperCase())
+    .slice(0, 2)
+    .join("");
+}
+
+/* ---------------- INIT ---------------- */
+loadMe();
+loadPosts();
 loadUsers();
 </script>
 
